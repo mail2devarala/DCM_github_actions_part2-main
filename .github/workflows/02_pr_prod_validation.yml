@@ -20,7 +20,39 @@ env:
   SNOWFLAKE_CLI_FEATURES_ENABLE_DBT: true
 
 jobs:
+  validate-pr:
+    name: Validate Pull Request Title
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Display Pull Request Details
+        run: |
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Author: ${{ github.event.pull_request.user.login }}"
+          echo "Source Branch: ${{ github.head_ref }}"
+          echo "Target Branch: ${{ github.base_ref }}"
+
+      - name: Validate PR Title
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+
+          echo "Validating PR Title: $TITLE"
+
+          if [[ ! "$TITLE" =~ ^(FEATURE|BUG|HOTFIX|DCM)-[0-9]+[[:space:]].+ ]]; then
+            echo "❌ Invalid PR title format."
+            echo "Expected format:"
+            echo "FEATURE-123 Description"
+            echo "BUG-456 Description"
+            echo "HOTFIX-789 Description"
+            echo "DCM-101 Description"
+            exit 1
+          fi
+
+          echo "✅ PR title validation passed."
+
   dcm-prod-plan:
+    name: DCM Production Plan Validation
     runs-on: ubuntu-latest
     environment: DCM_PROD
 
@@ -48,6 +80,7 @@ jobs:
             -x
 
   dbt-stage-validation:
+    name: DBT Stage Validation
     runs-on: ubuntu-latest
     environment: DCM_PROD
 
@@ -72,6 +105,7 @@ jobs:
         run: |
           pwd
           find sources/dbt/employee_analytics -maxdepth 2 -type f | sort
+
           test -f sources/dbt/employee_analytics/dbt_project.yml
           test -f sources/dbt/employee_analytics/profiles.yml
 
@@ -81,7 +115,6 @@ jobs:
 
           cp sources/dbt/employee_analytics/dbt_project.yml ci_dbt_project/
           cp sources/dbt/employee_analytics/profiles.yml ci_dbt_project/
-
           cp -R sources/dbt/employee_analytics/models ci_dbt_project/
 
           if [ -d "sources/dbt/employee_analytics/macros" ]; then
