@@ -7,7 +7,7 @@ CREATE USER IF NOT EXISTS SVC_EMP_DCM_PROD
   WORKLOAD_IDENTITY = (
     TYPE = OIDC
     ISSUER = 'https://token.actions.githubusercontent.com'
-    SUBJECT = 'repo:mail2devarala/DCM_github_actions_part2-main:environment:DCM_PROD' -- replace with your github_user_name/repo
+    SUBJECT = 'repo:mail2devarala@87258580/DCM_github_actions_part2-main@1473783748:environment:DCM_PROD' -- replace with your github_user_name/repo
   );
 
 -- DCM deployment
